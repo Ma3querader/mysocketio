@@ -1,0 +1,73 @@
+<html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>NETTY SOCKET.IO DEMO</title>
+    <base>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-1.11.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.7/socket.io.min.js"></script>
+    <style>
+        body {
+            padding: 20px;
+        }
+        #console {
+            height: 450px;
+            overflow: auto;
+        }
+        .username-msg {
+            color: orange;
+        }
+        .connect-msg {
+            color: green;
+        }
+        .disconnect-msg {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+<form action="/start" target="test" method="get">
+    输入框: <input type="text" name="content" />
+    <input hidden type="text" name="uname" th:value="${username}" />
+    <input type="submit" value="提交" />
+</form>
+<div id="console" class="well"></div>
+<input hidden th:value="${username}" id="uname" />
+<iframe name="test" style="display:none"></iframe>
+</body>
+<script type="text/javascript" th:inline="javascript">
+    var socket;
+    var loginUserName = $("#uname").val();
+    connect();
+
+    function connect() {
+        var opts = {
+            query: 'loginUserName=' + loginUserName
+        };
+        socket = io.connect('http://192.168.1.102:9099', opts);
+        socket.on('connect', function () {
+            console.log("连接成功");
+            serverOutput('<span class="connect-msg">连接成功</span>');
+        });
+        socket.on('push_event', function (data) {
+            output('<span class="username-msg">' + data + ' </span>');
+            console.log(data);
+        });
+
+        socket.on('disconnect', function () {
+            serverOutput('<span class="disconnect-msg">' + '已下线! </span>');
+        });
+    }
+
+    function output(message) {
+        var element = $("<div>" + " " + message + "</div>");
+        $('#console').prepend(element);
+    }
+
+    function serverOutput(message) {
+        var element = $("<div>" + message + "</div>");
+        $('#console').prepend(element);
+    }
+</script>
+</html>
